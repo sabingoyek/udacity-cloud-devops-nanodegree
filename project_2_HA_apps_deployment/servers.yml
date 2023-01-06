@@ -93,7 +93,13 @@ Resources:
                     apt-get install apache2 -y
                     systemctl start apache2.service
                     cd /var/www/html
-                    echo "Udacity Demo Web Server Up and Running" > index.html
+                    rm index.html
+                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+                    apt install unzip
+                    unzip awscliv2.zip
+                    sudo ./aws/install
+                    aws s3 sync s3://udagram007 /var/www/html/
+
             ImageId: ami-061dbd1209944525c
             SecurityGroups:
                 - Ref: WebServerSecGroup
@@ -171,6 +177,20 @@ Resources:
             Tags:
                 - Key: "Name"
                   Value:  "Jumpbox1"
+    Jumpbox2:
+        Type: AWS::EC2::Instance
+        Properties:
+            ImageId: ami-061dbd1209944525c 
+            InstanceType: t2.micro
+            SubnetId:
+                Fn::ImportValue:
+                    !Sub "${EnvironmentName}-PUB2-SN"
+            SecurityGroupIds: 
+                - !GetAtt 'JumpboxSecGroup.GroupId'
+            KeyName: thek
+            Tags:
+                - Key: "Name"
+                  Value: "Jumpbox2"
 Outputs:
     LoadBalancerUrl:
         Description:  The URL of the Application Load Balancer
